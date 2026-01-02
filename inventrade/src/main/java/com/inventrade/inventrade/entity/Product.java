@@ -12,6 +12,7 @@ public class Product {
     @Column(name = "ID")
     private long id;
 
+    @Column(name = "name")
     private String name;
 
     private int HSN;
