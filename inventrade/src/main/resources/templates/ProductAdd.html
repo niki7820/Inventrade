@@ -1,0 +1,73 @@
+<div th:fragment="productForm">
+    <h3 th:text="${product.id != null} ? 'Edit Product' : 'Add Product'"></h3>
+    <form th:object="${product}" id="productForm">
+        <input type="hidden" th:if="${product.id != null}" th:field="*{id}"/> <!-- keep id for edit -->
+
+        <div class="mb-3">
+            <label>Name</label>
+            <input type="text" class="form-control" th:field="*{name}" placeholder="Enter product name">
+        </div>
+
+        <div class="mb-3">
+            <label>HSN</label>
+            <input type="number" class="form-control" th:field="*{HSN}" placeholder="Enter HSN code">
+        </div>
+
+        <div class="mb-3">
+            <label>Price</label>
+            <input type="number" step="0.01" class="form-control" th:field="*{price}" placeholder="Enter price">
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea class="form-control" th:field="*{desc}" placeholder="Enter description"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Brand</label>
+            <input type="text" class="form-control" th:field="*{brand}" placeholder="Enter brand">
+        </div>
+
+        <button type="submit" class="btn btn-success">Save</button>
+    </form>
+</div>
+
+
+<script>
+    $(document).off("submit", "#productForm").on("submit", "#productForm", function(e) {
+        e.preventDefault();
+        const token = $("meta[name='_csrf']").attr("content");
+        const header = $("meta[name='_csrf_header']").attr("content");
+
+        $.ajax({
+            url: "/products/save",
+            type: "POST",
+            data: $(this).serialize(),
+            beforeSend: function(xhr) { xhr.setRequestHeader(header, token); },
+            success: function(response) {
+                $("#breadcrumbItem").text("Product");
+                $("#contentArea").html(response);
+            },
+            error: function(xhr) {
+                alert("Error: " + xhr.status);
+            }
+        });
+    });
+
+    // Load Edit Product form
+    // inside your main JS
+    $(document).on("click", ".btn-warning", function(e) {
+        e.preventDefault();
+        const url = $(this).attr("href");
+
+        $("#breadcrumbItem").text("Edit Product");
+
+        $.get(url, function(fragment) {
+            $("#contentArea").html(fragment); // inject form fragment
+        });
+    });
+
+
+
+</script>
+
