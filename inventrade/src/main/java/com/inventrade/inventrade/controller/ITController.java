@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -22,10 +23,16 @@ public class ITController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
+    @GetMapping("/")
+    public String root() {
+        return "redirect:/login";
     }
+
+
+//    @GetMapping("/login")
+//    public String login() {
+//        return "login";
+//    }
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, Principal principal) {

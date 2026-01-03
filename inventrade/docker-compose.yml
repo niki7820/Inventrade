@@ -3,7 +3,6 @@ version: "3.8"
 services:
   mysql:
     image: mysql:8
-    container_name: mysql_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -15,7 +14,6 @@ services:
 
   springboot-app:
     build: .
-    container_name: inventrade_app
     depends_on:
       - mysql
     ports:
