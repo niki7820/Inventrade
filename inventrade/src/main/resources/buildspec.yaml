@@ -4,40 +4,39 @@ phases:
   install:
     runtime-versions:
       java: 21
+    commands:
+      - echo "Installing dependencies..."
+      - mvn --version
+      - echo "Logging in to Amazon ECR..."
+      - aws --version
+
   pre_build:
     commands:
-      - mvn clean install
-      - echo logging in to Amazon ECR...
-      - aws --version
-      - REPOSITORY_URI=354612239460.dkr.ecr.ap-south-1.amazonaws.com/inventrade:latest
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - REPOSITORY_URI=354612239460.dkr.ecr.ap-south-1.amazonaws.com/inventrade
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - IMAGE_TAG= BUILD-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
-      -
+      - IMAGE_TAG=BUILD-$(echo $CODEBUILD_BUILD_ID | awk -F":" '{print $2}')
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the docker image
-      - docker build -t $REPOSITORY_URI:latest
+      - echo "Build started on `date`"
+      - echo "Building the Docker image..."
+      - docker build -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker images...
+      - echo "Build completed on `date`"
+      - echo "Pushing Docker images..."
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - printf '[{"name":"inventrade","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > image
-      - echo Writing image definitions file...
-      # add your container name
+      - echo "Writing image definitions file..."
       - DOCKER_CONTAINER_NAME=inventrade
-      - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > image
-      - echo $DOCKER_CONTAINER_NAME
-      - echo printing inagedefinitions.json
-      - cat inagedefinitions.json
-
+      - printf '[{"name":"%s","imageUri":"%s"}]' $DOCKER_CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
 
 artifacts:
   files:
-    - inagedefinitions.json
+    - imagedefinitions.json
     - target/inventrade-0.0.1-SNAPSHOT.jar
